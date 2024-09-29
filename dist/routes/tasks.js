@@ -7,13 +7,41 @@ const express_1 = require("express");
 const uuid_1 = require("uuid");
 const Task_1 = __importDefault(require("../models/Task"));
 const router = (0, express_1.Router)();
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
     const tasks = await Task_1.default.find();
-    res.render('tasks/index', { tasks });
+    res.render("tasks/index", { tasks });
 });
-router.route('/add')
+router
+    .route("/raw")
+    .get(async (req, res) => {
+    const tasks = await Task_1.default.find();
+    res.send(tasks);
+})
+    .delete(async (req, res) => {
+    await Task_1.default.deleteMany();
+    res.status(200);
+    res.send({ message: "All tasks deleleted succesfully" });
+});
+router
+    .route("/raw/:id")
+    .get(async (req, res) => {
+    const id = req.params.id;
+    const task = await Task_1.default.findById(id);
+    res.send(task);
+})
+    .put(async (req, res) => {
+    const id = req.params.id;
+    const newTask = await Task_1.default.findByIdAndUpdate(id, { ...req.body }, { new: true });
+    res.send(newTask);
+})
+    .delete(async (req, res) => {
+    await Task_1.default.findByIdAndDelete(req.params.id);
+    res.redirect("/tasks/");
+});
+router
+    .route("/add")
     .get((req, res) => {
-    res.render('tasks/add', { tasks: [{ name: "First Task" }] });
+    res.render("tasks/add", { tasks: [{ name: "First Task" }] });
 })
     .post(async (req, res) => {
     const { name, description } = req.body;
@@ -22,14 +50,14 @@ router.route('/add')
         id: (0, uuid_1.v4)(),
         name,
         description,
-        done: false
+        done: false,
     };
     const newTask = new Task_1.default(newTaskData);
     await newTask.save();
     res.redirect("/tasks/");
 });
-router.post('/clean', async (req, res) => {
+router.post("/clean", async (req, res) => {
     await Task_1.default.deleteMany();
-    res.redirect('/tasks/');
+    res.redirect("/tasks/");
 });
 exports.default = router;

@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node src/",
-    "dev": "concurrently \"tsc -w\" \"nodemon dist/\""
+    "start": "node dist/",
+    "dev": "concurrently \"tsc -w\" \"node dist/\""
   },
   "keywords": [],
   "author": "",
